@@ -1,0 +1,48 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sandbox | Welcome</title>
+    <link rel="stylesheet" href="css/foundation.css" />
+    <script src="js/vendor/modernizr.js"></script>
+  </head>
+  <body>
+    
+    <div class="row">
+      <div class="large-12 columns">
+        <h1>Welcome to the Sandbox</h1>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="large-12 columns">
+      	<div class="panel">
+	       <input type="file" id="file" name="file" />
+      	</div>
+      </div>
+    </div>
+    <div class="row">
+        <div class="large-6 columns">
+            <label>Key
+                <input id="key" type="text" placeholder="key" />
+            </label>
+            <label>Value
+                <input id="value" type="text" placeholder="value" />
+            </label>
+            <a id="SaveButton" class="round button"> Save to DB</a>
+        </div>
+        <div class="large-6 columns" id="KeysValues"></div>
+    </div>
+
+
+    
+    <script src="js/vendor/jquery.js"></script>
+    <script src="js/vendor/level.js"></script>
+    <script src="js/foundation.min.js"></script>
+    <script src="js/app/files.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+  </body>
+</html>
