@@ -1,3 +1,4 @@
+level= require('Level')
 db= level('./files')
 class HydraFile
   chunkSize:1000
@@ -136,7 +137,22 @@ fileChange= (e)->
   ,2000
   )
 keyAdded= ->
-
+  console.log(db)
+  console.log($("#key").val())
+  db.put $("#key").val(), $("#value").val(), (err)->
+    console.error(err) if err
+  document= $("<ul class='pricing-table'></ul>")
+  keyHolder= $("<li class='title'></li>")
+  valueHolder= $("<li class='bullet-item'></li>")
+  db.get String($("#key").val()), (err, value, key) ->
+    console.error(err) if err
+    keyHolder.val(key)
+    valueHolder.val(value)
+    document.append(keyHolder.val(key))
+    document.append(valueHolder.val(key))
+    $('#KeysValues').append(document)
+  $("#key").val(null)
+  $("#value").val(null)
 
 $('#file').on('change', fileChange)
 
