@@ -1,20 +1,24 @@
-level= require('Level')
-db= level('./files')
+db= level('files')
+db.open ->
+  console.log('db is open for business')
 class HydraFile
   chunkSize:1000
   blockSize: 1
   constructor:(@config) ->
     #$.extend(@, @config.File)
-    @manifest={name:@config.File.name, size: @config.Filesize,  lastModifiedDate:@config.File.lastModified, type:@config.File.type, content:[]}
+    @manifest={name:@config.Name, size: @config.Size,  lastModifiedDate:@config.LastModifiedDate, type:@config.Type, content:[]}
   retrieveManifest:->
     n=0
-    for i in [0..@config.File.size] by @chunkSize
+    for i in [0..@config.File.byteLength] by @chunkSize
       chunk=
         id: n++
         start: i
         end: i + @chunkSize
         blob: @config.File.slice(i, i + @chunkSize)
       @manifest.content.push(chunk)
+      key=String(@manifest.name + '-' + @manifest.lastModified + '-' + 'chunk-' + chunk.id)
+      db.put key, chunk, (err)->
+        console.error('Failed to store chunk!', err) if err
     @manifest
 
 
@@ -112,30 +116,16 @@ fileChange= (e)->
   blobArray=[]
   resultArray=[]
   contentType=""
-  afile
+  afile=null
   for file in files
-    afile= file
-    hydraFile= new HydraFile({File: file})
-    console.log(hydraFile)
-    console.log(hydraFile.retrieveManifest())
-
-    for content in hydraFile.manifest.content
-      reader= new FileReader
-      reader.onload= (e) ->
-        #$('#file').after($('<p>' + e.target.result + '</p>'))
-        resultArray.push(e.target.result)
-        sendData(e.target.result)
-      reader.readAsArrayBuffer(content.blob)
-  setTimeout( ->
-    console.log("result array: ", resultArray.length)
-    blob = new Blob(dataArray, {type:contentType})
-    #$.extend(afile, blob)
-    output= new FileReader
-    output.onload= (e)->
-      $('#file').after($('<img src="' + e.target.result + '">'))
-    output.readAsDataURL(blob)
-  ,2000
-  )
+    reader= new FileReader
+    reader.onload= (e) ->
+      console.log(e)
+      afile= e.target.result
+      hydraFile= new HydraFile({Name: file.name, Type: file.type, Size: file.size, LastModified: file.lastModifiedDate, File: e.target.result})
+      console.log(hydraFile)
+      console.log(hydraFile.retrieveManifest())
+    reader.readAsArrayBuffer(file)
 keyAdded= ->
   console.log(db)
   console.log($("#key").val())

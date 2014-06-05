@@ -5,7 +5,7 @@ module.exports = Level
 var IDB = require('idb-wrapper')
 var AbstractLevelDOWN = require('abstract-leveldown').AbstractLevelDOWN
 var util = require('util')
-var Iterator = require('./../../node_modules/level-js/iterator')
+var Iterator = require('./iterator')
 var isBuffer = require('isbuffer')
 var xtend = require('xtend')
 var toBuffer = require('typedarray-to-buffer')
@@ -172,7 +172,7 @@ var checkKeyValue = Level.prototype._checkKeyValue = function (obj, type) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./iterator":2,"abstract-leveldown":5,"buffer":16,"idb-wrapper":6,"isbuffer":7,"typedarray-to-buffer":9,"util":22,"xtend":11}],2:[function(require,module,exports){
+},{"./iterator":2,"abstract-leveldown":5,"buffer":17,"idb-wrapper":6,"isbuffer":7,"typedarray-to-buffer":9,"util":23,"xtend":11}],2:[function(require,module,exports){
 var util = require('util')
 var AbstractIterator  = require('abstract-leveldown').AbstractIterator
 var ltgt = require('ltgt')
@@ -239,7 +239,7 @@ Iterator.prototype._next = function (callback) {
   this.callback = callback
 }
 
-},{"abstract-leveldown":5,"ltgt":8,"util":22}],3:[function(require,module,exports){
+},{"abstract-leveldown":5,"ltgt":8,"util":23}],3:[function(require,module,exports){
 (function (process){
 /* Copyright (c) 2013 Rod Vagg, MIT License */
 
@@ -322,8 +322,8 @@ AbstractChainedBatch.prototype.write = function (options, callback) {
 }
 
 module.exports = AbstractChainedBatch
-}).call(this,require("6h1dIQ"))
-},{"6h1dIQ":20}],4:[function(require,module,exports){
+}).call(this,require("NPEqJt"))
+},{"NPEqJt":21}],4:[function(require,module,exports){
 (function (process){
 /* Copyright (c) 2013 Rod Vagg, MIT License */
 
@@ -375,8 +375,8 @@ AbstractIterator.prototype.end = function (callback) {
 
 module.exports = AbstractIterator
 
-}).call(this,require("6h1dIQ"))
-},{"6h1dIQ":20}],5:[function(require,module,exports){
+}).call(this,require("NPEqJt"))
+},{"NPEqJt":21}],5:[function(require,module,exports){
 (function (process,Buffer){
 /* Copyright (c) 2013 Rod Vagg, MIT License */
 
@@ -637,8 +637,8 @@ module.exports.AbstractLevelDOWN    = AbstractLevelDOWN
 module.exports.AbstractIterator     = AbstractIterator
 module.exports.AbstractChainedBatch = AbstractChainedBatch
 
-}).call(this,require("6h1dIQ"),require("buffer").Buffer)
-},{"./abstract-chained-batch":3,"./abstract-iterator":4,"6h1dIQ":20,"buffer":16,"xtend":11}],6:[function(require,module,exports){
+}).call(this,require("NPEqJt"),require("buffer").Buffer)
+},{"./abstract-chained-batch":3,"./abstract-iterator":4,"NPEqJt":21,"buffer":17,"xtend":11}],6:[function(require,module,exports){
 /*global window:false, self:false, define:false, module:false */
 
 /**
@@ -1868,7 +1868,7 @@ function isBuffer (o) {
     || /\[object (.+Array|Array.+)\]/.test(Object.prototype.toString.call(o));
 }
 
-},{"buffer":16}],8:[function(require,module,exports){
+},{"buffer":17}],8:[function(require,module,exports){
 (function (Buffer){
 
 exports.compare = function (a, b) {
@@ -1967,7 +1967,7 @@ exports.filter = function (range, compare) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":16}],9:[function(require,module,exports){
+},{"buffer":17}],9:[function(require,module,exports){
 (function (Buffer){
 /**
  * Convert a typed array to a Buffer without a copy
@@ -1989,7 +1989,7 @@ module.exports = function (arr) {
   }
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":16}],10:[function(require,module,exports){
+},{"buffer":17}],10:[function(require,module,exports){
 module.exports = hasKeys
 
 function hasKeys(source) {
@@ -2154,6 +2154,8 @@ module.exports = function isArguments(value) {
 
 
 },{"./foreach":12,"./isArguments":14}],16:[function(require,module,exports){
+window.level= require('./index.js')
+},{"./index.js":1}],17:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -3304,7 +3306,7 @@ function assert (test, message) {
   if (!test) throw new Error(message || 'Failed assertion')
 }
 
-},{"base64-js":17,"ieee754":18}],17:[function(require,module,exports){
+},{"base64-js":18,"ieee754":19}],18:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -3427,7 +3429,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	module.exports.fromByteArray = uint8ToBase64
 }())
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -3513,7 +3515,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -3538,7 +3540,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -3603,14 +3605,14 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4199,5 +4201,5 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require("6h1dIQ"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":21,"6h1dIQ":20,"inherits":19}]},{},[1,2])
+}).call(this,require("NPEqJt"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":22,"NPEqJt":21,"inherits":20}]},{},[16])
