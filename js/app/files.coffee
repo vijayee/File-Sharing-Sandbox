@@ -4,22 +4,45 @@ db.open ->
 class HydraFile
   chunkSize:1000
   blockSize: 1
+  file: null
   constructor:(@config) ->
+    _.bindAll(@,'receivedFromDb')
     #$.extend(@, @config.File)
     @manifest={name:@config.Name, size: @config.Size,  lastModifiedDate:@config.LastModifiedDate, type:@config.Type, content:[]}
   retrieveManifest:->
     n=0
     for i in [0..@config.File.byteLength] by @chunkSize
       chunk=
-        id: n++
+        id: n
         start: i
         end: i + @chunkSize
         blob: @config.File.slice(i, i + @chunkSize)
+        key:String(@manifest.name + '-' + @manifest.lastModifiedDate + '-' + 'chunk-' + n++)
       @manifest.content.push(chunk)
-      key=String(@manifest.name + '-' + @manifest.lastModified + '-' + 'chunk-' + chunk.id)
-      db.put key, chunk, (err)->
+      db.put chunk.key, chunk.blob, (err)->
         console.error('Failed to store chunk!', err) if err
     @manifest
+  createFileFromDB:->
+    for chunk in @manifest.content
+      db.get chunk.key, @receivedFromDb
+  receivedFromDb: (err, value, key)->
+    appendBuffer=(buffer1, buffer2) ->
+      tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength)
+      tmp.set(new Uint8Array(buffer1), 0)
+      tmp.set(new Uint8Array(buffer2), buffer1.byteLength)
+      tmp.buffer
+    console.error('Failed to retrieve chunk!', err) if err
+    console.log(key)
+    console.log(value)
+    #console.log(@)
+    if !@file?
+      @file= value
+    else
+      @file= appendBuffer(file,value)
+  getFile:->
+    new Blob(@file)
+
+
 
 
 createConnection= ->
@@ -110,7 +133,7 @@ handleReceiveChannelStateChange= ->
   console.log('Receive channel state is: ' + readyState)
 
 createConnection()
-
+hydraFile= null
 fileChange= (e)->
   files=e.target.files
   blobArray=[]
@@ -122,30 +145,48 @@ fileChange= (e)->
     reader.onload= (e) ->
       console.log(e)
       afile= e.target.result
-      hydraFile= new HydraFile({Name: file.name, Type: file.type, Size: file.size, LastModified: file.lastModifiedDate, File: e.target.result})
+      hydraFile= new HydraFile({Name: file.name, Type: file.type, Size: file.size, LastModifiedDate: file.lastModifiedDate, File: e.target.result})
       console.log(hydraFile)
       console.log(hydraFile.retrieveManifest())
+      #hydraFile.createFileFromDB()
+      ###
+      setTimeout(->
+        console.log(hydraFile.getFile())
+      ,1000)
+
+      ###
     reader.readAsArrayBuffer(file)
 keyAdded= ->
-  console.log(db)
-  console.log($("#key").val())
-  db.put $("#key").val(), $("#value").val(), (err)->
+  key=$("#key").val()
+  value=$("#value").val()
+  db.put key, value, (err)->
     console.error(err) if err
   document= $("<ul class='pricing-table'></ul>")
   keyHolder= $("<li class='title'></li>")
   valueHolder= $("<li class='bullet-item'></li>")
-  db.get String($("#key").val()), (err, value, key) ->
-    console.error(err) if err
+  setTimeout(->
+    db.get key, (err, value, key) ->
+    console.error(err) if err?
+    console.log(value)
     keyHolder.val(key)
     valueHolder.val(value)
-    document.append(keyHolder.val(key))
-    document.append(valueHolder.val(key))
+    document.append(keyHolder.text(key))
+    document.append(valueHolder.text(value))
     $('#KeysValues').append(document)
-  $("#key").val(null)
-  $("#value").val(null)
+    $("#key").val(null)
+    $("#value").val(null)
+  ,3000)
+
+
+retrieveFromDB=->
+ console.log('happened')
+ hydraFile.createFileFromDB()
+ setTimeout(->
+   console.log(hydraFile.getFile())
+ , 2000)
 
 $('#file').on('change', fileChange)
-
+$('#RetrieveFromDB').on('click', retrieveFromDB)
 $('#SaveButton').on('click', keyAdded)
 
 
