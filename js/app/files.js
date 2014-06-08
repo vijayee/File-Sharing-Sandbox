@@ -59,14 +59,6 @@
     };
 
     HydraFile.prototype.receivedFromDb = function(err, value, key) {
-      var appendBuffer;
-      appendBuffer = function(buffer1, buffer2) {
-        var tmp;
-        tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
-        tmp.set(new Uint8Array(buffer1), 0);
-        tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
-        return tmp.buffer;
-      };
       if (this.file == null) {
         this.file = [];
         return this.file.push(value);
@@ -210,7 +202,6 @@
       file = files[_i];
       reader = new FileReader;
       reader.onload = function(e) {
-        console.log(e);
         afile = e.target.result;
         hydraFile = new HydraFile({
           Name: file.name,
@@ -219,14 +210,7 @@
           LastModifiedDate: file.lastModifiedDate,
           File: e.target.result
         });
-        console.log(hydraFile);
-        return console.log(hydraFile.retrieveManifest());
-
-        /*
-        setTimeout(->
-          console.log(hydraFile.getFile())
-        ,1000)
-         */
+        return hydraFile.retrieveManifest();
       };
       _results.push(reader.readAsArrayBuffer(file));
     }
@@ -262,7 +246,6 @@
   };
 
   retrieveFromDB = function() {
-    console.log('happened');
     hydraFile.createFileFromDB();
     return setTimeout(function() {
       var output;
@@ -272,7 +255,7 @@
         return $('#file').after($('<img src="' + e.target.result + '">'));
       };
       return output.readAsDataURL(hydraFile.getFile());
-    }, 5000);
+    }, 1000);
   };
 
   $('#file').on('change', fileChange);

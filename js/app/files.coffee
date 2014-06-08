@@ -25,19 +25,12 @@ class HydraFile
     for chunk in @manifest.content
       db.get chunk.key, @receivedFromDb
   receivedFromDb: (err, value, key)->
-    appendBuffer=(buffer1, buffer2) ->
-      tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength)
-      tmp.set(new Uint8Array(buffer1), 0)
-      tmp.set(new Uint8Array(buffer2), buffer1.byteLength)
-      tmp.buffer
-    #console.log(@)
     if  not @file?
       @file= []
       @file.push(value)
     else
       @file.push(value)
   getFile:->
-    #console.log(@file)
     new Blob(@file)
 
 
@@ -141,18 +134,9 @@ fileChange= (e)->
   for file in files
     reader= new FileReader
     reader.onload= (e) ->
-      console.log(e)
       afile= e.target.result
       hydraFile= new HydraFile({Name: file.name, Type: file.type, Size: file.size, LastModifiedDate: file.lastModifiedDate, File: e.target.result})
-      console.log(hydraFile)
-      console.log(hydraFile.retrieveManifest())
-      #hydraFile.createFileFromDB()
-      ###
-      setTimeout(->
-        console.log(hydraFile.getFile())
-      ,1000)
-
-      ###
+      hydraFile.retrieveManifest()
     reader.readAsArrayBuffer(file)
 keyAdded= ->
   key=$("#key").val()
@@ -177,7 +161,6 @@ keyAdded= ->
 
 
 retrieveFromDB=->
- console.log('happened')
  hydraFile.createFileFromDB()
  setTimeout(->
    console.log()
@@ -185,7 +168,7 @@ retrieveFromDB=->
    output.onload= (e)->
      $('#file').after($('<img src="' + e.target.result + '">'))
    output.readAsDataURL(hydraFile.getFile())
- , 5000)
+ , 1000)
 
 $('#file').on('change', fileChange)
 $('#RetrieveFromDB').on('click', retrieveFromDB)
