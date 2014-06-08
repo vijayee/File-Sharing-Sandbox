@@ -35,11 +35,10 @@
           id: n,
           start: i,
           end: i + this.chunkSize,
-          blob: this.config.File.slice(i, i + this.chunkSize),
           key: String(this.manifest.name + '-' + this.manifest.lastModifiedDate + '-' + 'chunk-' + n++)
         };
         this.manifest.content.push(chunk);
-        db.put(chunk.key, chunk.blob, function(err) {
+        db.put(chunk.key, this.config.File.slice(i, i + this.chunkSize), function(err) {
           if (err) {
             return console.error('Failed to store chunk!', err);
           }
@@ -68,15 +67,11 @@
         tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
         return tmp.buffer;
       };
-      if (err) {
-        console.error('Failed to retrieve chunk!', err);
-      }
-      console.log(key);
-      console.log(value);
       if (this.file == null) {
-        return this.file = value;
+        this.file = [];
+        return this.file.push(value);
       } else {
-        return this.file = appendBuffer(file, value);
+        return this.file.push(value);
       }
     };
 
@@ -270,8 +265,14 @@
     console.log('happened');
     hydraFile.createFileFromDB();
     return setTimeout(function() {
-      return console.log(hydraFile.getFile());
-    }, 2000);
+      var output;
+      console.log();
+      output = new FileReader;
+      output.onload = function(e) {
+        return $('#file').after($('<img src="' + e.target.result + '">'));
+      };
+      return output.readAsDataURL(hydraFile.getFile());
+    }, 5000);
   };
 
   $('#file').on('change', fileChange);

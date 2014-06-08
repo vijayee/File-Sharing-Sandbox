@@ -16,10 +16,9 @@ class HydraFile
         id: n
         start: i
         end: i + @chunkSize
-        blob: @config.File.slice(i, i + @chunkSize)
         key:String(@manifest.name + '-' + @manifest.lastModifiedDate + '-' + 'chunk-' + n++)
       @manifest.content.push(chunk)
-      db.put chunk.key, chunk.blob, (err)->
+      db.put chunk.key, @config.File.slice(i, i + @chunkSize), (err)->
         console.error('Failed to store chunk!', err) if err
     @manifest
   createFileFromDB:->
@@ -31,15 +30,14 @@ class HydraFile
       tmp.set(new Uint8Array(buffer1), 0)
       tmp.set(new Uint8Array(buffer2), buffer1.byteLength)
       tmp.buffer
-    console.error('Failed to retrieve chunk!', err) if err
-    console.log(key)
-    console.log(value)
     #console.log(@)
-    if !@file?
-      @file= value
+    if  not @file?
+      @file= []
+      @file.push(value)
     else
-      @file= appendBuffer(file,value)
+      @file.push(value)
   getFile:->
+    #console.log(@file)
     new Blob(@file)
 
 
@@ -182,8 +180,12 @@ retrieveFromDB=->
  console.log('happened')
  hydraFile.createFileFromDB()
  setTimeout(->
-   console.log(hydraFile.getFile())
- , 2000)
+   console.log()
+   output= new FileReader
+   output.onload= (e)->
+     $('#file').after($('<img src="' + e.target.result + '">'))
+   output.readAsDataURL(hydraFile.getFile())
+ , 5000)
 
 $('#file').on('change', fileChange)
 $('#RetrieveFromDB').on('click', retrieveFromDB)
