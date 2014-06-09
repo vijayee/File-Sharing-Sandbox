@@ -1,9 +1,10 @@
 db= level('files')
+console.log(db)
 db.open ->
   console.log('db is open for business')
 class HydraFile
   chunkSize:1000
-  blockSize: 1
+  blockSize: 16
   file: null
   constructor:(@config) ->
     _.bindAll(@,'receivedFromDb')
@@ -11,19 +12,33 @@ class HydraFile
     @manifest={name:@config.Name, size: @config.Size,  lastModifiedDate:@config.LastModifiedDate, type:@config.Type, content:[]}
   retrieveManifest:->
     n=0
+    b=0
     for i in [0..@config.File.byteLength] by @chunkSize
       chunk=
         id: n
+        block: b
         start: i
         end: i + @chunkSize
-        key:String(@manifest.name + '-' + @manifest.lastModifiedDate + '-' + 'chunk-' + n++)
+        key:String(@manifest.name + '-' + @manifest.lastModifiedDate + '-block-' + b + '-' + 'chunk-' + n++)
       @manifest.content.push(chunk)
       db.put chunk.key, @config.File.slice(i, i + @chunkSize), (err)->
         console.error('Failed to store chunk!', err) if err
+      @manifest.content.blocks= b+1
+      b++ if n % @blockSize == 0
     @manifest
   createFileFromDB:->
     for chunk in @manifest.content
       db.get chunk.key, @receivedFromDb
+  createFileFromDBByBlock:->
+    for block in [0...@manifest.content.blocks]
+      manifestBlock= _.where(@manifest.content, {block: block})
+      console.log(manifestBlock)
+      options=
+        start:manifestBlock[0].key
+        end:manifestBlock[manifestBlock.length-1].key
+      that= @
+      db..createReadStream(options).on 'data',(data) ->
+        that.receivedFromDb(null,data.value,data.key)
   receivedFromDb: (err, value, key)->
     if  not @file?
       @file= []
@@ -136,7 +151,7 @@ fileChange= (e)->
     reader.onload= (e) ->
       afile= e.target.result
       hydraFile= new HydraFile({Name: file.name, Type: file.type, Size: file.size, LastModifiedDate: file.lastModifiedDate, File: e.target.result})
-      hydraFile.retrieveManifest()
+      console.log(hydraFile.retrieveManifest())
     reader.readAsArrayBuffer(file)
 keyAdded= ->
   key=$("#key").val()
@@ -161,7 +176,8 @@ keyAdded= ->
 
 
 retrieveFromDB=->
- hydraFile.createFileFromDB()
+ hydraFile.createFileFromDBByBlock()
+ #hydraFile.createFileFromDB()
  setTimeout(->
    console.log()
    output= new FileReader

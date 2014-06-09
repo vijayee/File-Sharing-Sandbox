@@ -4,6 +4,8 @@
 
   db = level('files');
 
+  console.log(db);
+
   db.open(function() {
     return console.log('db is open for business');
   });
@@ -11,7 +13,7 @@
   HydraFile = (function() {
     HydraFile.prototype.chunkSize = 1000;
 
-    HydraFile.prototype.blockSize = 1;
+    HydraFile.prototype.blockSize = 16;
 
     HydraFile.prototype.file = null;
 
@@ -28,14 +30,16 @@
     }
 
     HydraFile.prototype.retrieveManifest = function() {
-      var chunk, i, n, _i, _ref, _ref1;
+      var b, chunk, i, n, _i, _ref, _ref1;
       n = 0;
+      b = 0;
       for (i = _i = 0, _ref = this.config.File.byteLength, _ref1 = this.chunkSize; _ref1 > 0 ? _i <= _ref : _i >= _ref; i = _i += _ref1) {
         chunk = {
           id: n,
+          block: b,
           start: i,
           end: i + this.chunkSize,
-          key: String(this.manifest.name + '-' + this.manifest.lastModifiedDate + '-' + 'chunk-' + n++)
+          key: String(this.manifest.name + '-' + this.manifest.lastModifiedDate + '-block-' + b + '-' + 'chunk-' + n++)
         };
         this.manifest.content.push(chunk);
         db.put(chunk.key, this.config.File.slice(i, i + this.chunkSize), function(err) {
@@ -43,6 +47,10 @@
             return console.error('Failed to store chunk!', err);
           }
         });
+        this.manifest.content.blocks = b + 1;
+        if (n % this.blockSize === 0) {
+          b++;
+        }
       }
       return this.manifest;
     };
@@ -54,6 +62,26 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         chunk = _ref[_i];
         _results.push(db.get(chunk.key, this.receivedFromDb));
+      }
+      return _results;
+    };
+
+    HydraFile.prototype.createFileFromDBByBlock = function() {
+      var block, manifestBlock, options, that, _i, _ref, _results;
+      _results = [];
+      for (block = _i = 0, _ref = this.manifest.content.blocks; 0 <= _ref ? _i < _ref : _i > _ref; block = 0 <= _ref ? ++_i : --_i) {
+        manifestBlock = _.where(this.manifest.content, {
+          block: block
+        });
+        console.log(manifestBlock);
+        options = {
+          start: manifestBlock[0].key,
+          end: manifestBlock[manifestBlock.length - 1].key
+        };
+        that = this;
+        _results.push(db.createReadStream(options).on('data', function(data) {
+          return that.receivedFromDb(null, data.value, data.key);
+        }));
       }
       return _results;
     };
@@ -210,7 +238,7 @@
           LastModifiedDate: file.lastModifiedDate,
           File: e.target.result
         });
-        return hydraFile.retrieveManifest();
+        return console.log(hydraFile.retrieveManifest());
       };
       _results.push(reader.readAsArrayBuffer(file));
     }
@@ -246,7 +274,7 @@
   };
 
   retrieveFromDB = function() {
-    hydraFile.createFileFromDB();
+    hydraFile.createFileFromDBByBlock();
     return setTimeout(function() {
       var output;
       console.log();
